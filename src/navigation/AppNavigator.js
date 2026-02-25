@@ -1,32 +1,54 @@
-import { SafeAreaView, StyleSheet, View, Text, Pressable } from 'react-native';
 import { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Text } from 'react-native';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import UploadScreen from '../screens/UploadScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
-// @ts-ignore
-function BottomNav({ activeTab, onTabChange }) {
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function MainTabs({ userName, userPhone, onSaveProfile, onLogout, onOpenUpload }) {
   return (
-    <View style={styles.navContainer}>
-      <Pressable style={styles.navItem} onPress={() => onTabChange('home')}>
-        <Text style={[styles.navIcon, activeTab === 'home' ? styles.activeIcon : null]}>🏠</Text>
-        <Text style={[styles.navText, activeTab === 'home' ? styles.activeText : null]}>Home</Text>
-      </Pressable>
-      <Pressable style={styles.navItem} onPress={() => onTabChange('upload')}>
-        <Text style={[styles.navIcon, activeTab === 'upload' ? styles.activeIcon : null]}>📷</Text>
-        <Text style={[styles.navText, activeTab === 'upload' ? styles.activeText : null]}>Upload</Text>
-      </Pressable>
-      <Pressable style={styles.navItem} onPress={() => onTabChange('chat')}>
-        <Text style={[styles.navIcon, activeTab === 'chat' ? styles.activeIcon : null]}>🤖</Text>
-        <Text style={[styles.navText, activeTab === 'chat' ? styles.activeText : null]}>Chat</Text>
-      </Pressable>
-      <Pressable style={styles.navItem} onPress={() => onTabChange('profile')}>
-        <Text style={[styles.navIcon, activeTab === 'profile' ? styles.activeIcon : null]}>👨‍🌾</Text>
-        <Text style={[styles.navText, activeTab === 'profile' ? styles.activeText : null]}>Profile</Text>
-      </Pressable>
-    </View>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: '#16A34A',
+        tabBarInactiveTintColor: '#166534',
+        tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
+        tabBarStyle: { borderTopColor: '#BBF7D0', borderTopWidth: 1, backgroundColor: '#FFFFFF' },
+        tabBarIcon: ({ color }) => {
+          const icon = route.name === 'Home' ? '🏠' : route.name === 'Chat' ? '🤖' : '👨‍🌾';
+          return <Text style={{ fontSize: 20, color }}>{icon}</Text>;
+        },
+      })}
+    >
+      <Tab.Screen name="Home">
+        {({ navigation }) => (
+          <HomeScreen
+            userName={userName}
+            onOpenProfile={() => navigation.navigate('Profile')}
+            onOpenChat={() => navigation.navigate('Chat')}
+            onOpenUpload={onOpenUpload}
+          />
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="Chat" component={ChatScreen} />
+      <Tab.Screen name="Profile">
+        {() => (
+          <ProfileScreen
+            userPhone={userPhone}
+            userName={userName}
+            onSaveProfile={onSaveProfile}
+            onLogout={onLogout}
+          />
+        )}
+      </Tab.Screen>
+    </Tab.Navigator>
   );
 }
 
@@ -34,84 +56,50 @@ export default function AppNavigator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userPhone, setUserPhone] = useState('9876543210');
   const [userName, setUserName] = useState('Farmer');
-  const [activeTab, setActiveTab] = useState('home');
 
   const handleLogin = (/** @type {import("react").SetStateAction<string>} */ phone, /** @type {any} */ name) => {
     setUserPhone(phone);
     setUserName(name || 'Farmer');
     setIsAuthenticated(true);
-    setActiveTab('home');
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setActiveTab('home');
   };
 
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
+  const handleSaveProfile = ({ name, phone }) => {
+    setUserName(name || 'Farmer');
+    setUserPhone(phone || '');
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {activeTab === 'home' ? (
-          <HomeScreen
-            userName={userName}
-            onOpenProfile={() => setActiveTab('profile')}
-          />
-        ) : null}
-        {activeTab === 'upload' ? <UploadScreen /> : null}
-        {activeTab === 'chat' ? <ChatScreen /> : null}
-        {activeTab === 'profile' ? (
-          <ProfileScreen
-            userPhone={userPhone}
-            userName={userName}
-            onBack={() => setActiveTab('home')}
-            onLogout={handleLogout}
-          />
-        ) : null}
-      </View>
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!isAuthenticated ? (
+          <Stack.Screen name="Login">
+            {() => <LoginScreen onLogin={handleLogin} />}
+          </Stack.Screen>
+        ) : (
+          <>
+            <Stack.Screen name="MainTabs">
+              {({ navigation }) => (
+                <MainTabs
+                  userName={userName}
+                  userPhone={userPhone}
+                  onSaveProfile={handleSaveProfile}
+                  onLogout={handleLogout}
+                  onOpenUpload={() => navigation.navigate('Upload')}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen
+              name="Upload"
+              component={UploadScreen}
+              options={{ headerShown: true, title: 'Upload' }}
+            />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F0FDF4',
-  },
-  container: {
-    flex: 1,
-  },
-  navContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#BBF7D0',
-    paddingVertical: 10,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navIcon: {
-    fontSize: 20,
-    color: '#166534',
-  },
-  navText: {
-    marginTop: 2,
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#166534',
-  },
-  activeIcon: {
-    color: '#16A34A',
-  },
-  activeText: {
-    color: '#16A34A',
-    fontWeight: '700',
-  },
-});

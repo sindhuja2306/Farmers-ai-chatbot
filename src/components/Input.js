@@ -7,10 +7,19 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
  *  onChangeText: (value: string) => void,
  *  placeholder?: string,
  *  keyboardType?: import('react-native').KeyboardTypeOptions,
+ *  secureTextEntry?: boolean,
  *  maxLength?: number
  * }} props
  */
-export default function Input({ label, value, onChangeText, placeholder, keyboardType = 'default', maxLength }) {
+export default function Input({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  keyboardType = 'default',
+  secureTextEntry = false,
+  maxLength,
+}) {
   return (
     <View style={styles.wrapper}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
@@ -20,6 +29,7 @@ export default function Input({ label, value, onChangeText, placeholder, keyboar
         placeholder={placeholder}
         placeholderTextColor="#6B7280"
         keyboardType={keyboardType}
+        secureTextEntry={secureTextEntry}
         maxLength={maxLength}
         style={styles.input}
       />
@@ -39,12 +49,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#86EFAC',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#F9FAFB',
+    borderRadius: 16,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 17,
+    paddingVertical: 13,
+    fontSize: 18,
     color: '#14532D',
   },
 });

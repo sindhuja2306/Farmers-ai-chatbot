@@ -1,29 +1,54 @@
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Input from '../components/Input';
 import Button from '../components/Button';
 
-export default function ProfileScreen({ userPhone, userName, onBack, onLogout }) {
+export default function ProfileScreen({
+  userPhone,
+  userName,
+  onSaveProfile,
+  onLogout,
+}) {
+  const [name, setName] = useState(userName || '');
+  const [phone, setPhone] = useState(userPhone || '');
+
+  const handleSave = () => {
+    onSaveProfile({
+      name,
+      phone,
+    });
+  };
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>My Profile</Text>
-      <Text style={styles.subheading}>Manage your account and farm details</Text>
+      <Text style={styles.heading}>Farmer Profile</Text>
+      <Text style={styles.subheading}>Keep your basic details updated</Text>
 
       <View style={styles.card}>
-        <Text style={styles.name}>{userName || 'Farmer'}</Text>
-        <Text style={styles.info}>📞 +91 {userPhone}</Text>
-        <Text style={styles.info}>📍 Nashik, Maharashtra</Text>
-        <Text style={styles.info}>🌾 Main Crops: Tomato, Onion, Wheat</Text>
-        <Text style={styles.info}>📐 Land Size: 4.5 Acres</Text>
-      </View>
+        <View style={styles.avatarWrap}>
+          <Text style={styles.avatarText}>👨‍🌾</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Quick Actions</Text>
-        <Text style={styles.info}>• Language: English / Hindi / Marathi</Text>
-        <Text style={styles.info}>• Notifications: Enabled</Text>
-        <Text style={styles.info}>• AI Advisory Plan: Basic</Text>
+        <Text style={styles.cardTitle}>Personal Details</Text>
+
+        <View style={styles.inputSpacing}>
+          <Input label="Name" value={name} onChangeText={setName} placeholder="Enter name" />
+        </View>
+
+        <View style={styles.inputSpacing}>
+          <Input
+            label="Phone number"
+            value={phone}
+            onChangeText={setPhone}
+            placeholder="Enter phone number"
+            keyboardType="phone-pad"
+            maxLength={10}
+          />
+        </View>
       </View>
 
       <View style={styles.buttonSpacing}>
-        <Button title="Back to Home" onPress={onBack} />
+        <Button title="Save profile" onPress={handleSave} />
       </View>
       <View style={styles.buttonSpacing}>
         <Button title="Logout" onPress={onLogout} variant="secondary" />
@@ -35,47 +60,54 @@ export default function ProfileScreen({ userPhone, userName, onBack, onLogout })
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#F6F8FA',
   },
   content: {
-    padding: 18,
-    paddingBottom: 34,
+    padding: 16,
+    paddingBottom: 28,
   },
   heading: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '800',
-    color: '#14532D',
+    color: '#1F2937',
   },
   subheading: {
-    marginTop: 6,
-    marginBottom: 16,
-    fontSize: 16,
-    color: '#166534',
+    marginTop: 4,
+    marginBottom: 14,
+    fontSize: 14,
+    color: '#6B7280',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#BBF7D0',
+    borderColor: '#E5E7EB',
     padding: 16,
     marginBottom: 12,
   },
+  avatarWrap: {
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  avatarText: {
+    fontSize: 42,
+  },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#166534',
-    marginBottom: 8,
+    color: '#1F2937',
+    marginBottom: 12,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#14532D',
-    marginBottom: 8,
-  },
-  info: {
-    fontSize: 16,
-    color: '#14532D',
-    lineHeight: 24,
+  inputSpacing: {
+    marginBottom: 12,
   },
   buttonSpacing: {
     marginTop: 10,
